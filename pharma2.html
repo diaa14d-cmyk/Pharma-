@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار مبادئ الصيدلة الشامل</title>
+    <style>
+        :root {
+            --primary: #4a69bd;
+            --secondary: #6a89cc;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --light: #f1f2f6;
+            --dark: #2f3542;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        #quiz-wrapper {
+            width: 95%;
+            max-width: 800px;
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .quiz-header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            height: 8px;
+            background: #dfe4ea;
+            width: 100%;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .quiz-body {
+            padding: 30px;
+            min-height: 350px;
+        }
+
+        .question-number {
+            color: var(--secondary);
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            direction: ltr;
+        }
+
+        .option {
+            background: var(--light);
+            border: 2px solid transparent;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+
+        .option:hover {
+            background: #e1e4ea;
+        }
+
+        .option.correct {
+            background: #d4edda !important;
+            border-color: var(--success) !important;
+            color: #155724;
+        }
+
+        .option.wrong {
+            background: #f8d7da !important;
+            border-color: var(--danger) !important;
+            color: #721c24;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff9db;
+            border-right: 5px solid var(--warning);
+            border-radius: 8px;
+            display: none;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .quiz-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .btn-next {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-next:disabled {
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-wrapper">
+    <div class="quiz-header">
+        <h1 style="margin:0; font-size:1.2rem;">مبادئ الصيدلة - الحبوب</h1>
+        <div class="score-badge">النتيجة: <span id="score">0</span> / 50</div>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div class="quiz-body" id="quiz-content">
+        <span class="question-number" id="q-count">السؤال 1 من 50</span>
+        <div id="q-text" class="question-text"></div>
+        <div id="options" class="options-grid"></div>
+        
+        <div id="explanation" class="explanation">
+            <strong>نص توضيحي من الملف:</strong>
+            <p id="exp-content" style="margin:5px 0;"></p>
+            <small id="exp-page" style="color: #666;"></small>
+        </div>
+    </div>
+
+    <div class="quiz-footer">
+        <button id="next-btn" class="btn btn-next" onclick="nextQuestion()" disabled>السؤال التالي</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "Tablets are defined as the ____ unit dosage form of API with excipients.", options: ["Liquid", "Solid", "Gaseous", "Semi-solid"], correct: 1, page: 1, ref: "Tablets: may be defined as the solid unit dosage form of active pharmaceutical ingredient with suitable excipients." },
+        { q: "Which tablets are intended to provide rapid disintegration?", options: ["Sustained release", "Compressed tablet (plain)", "Enteric coated", "Sugar coated"], correct: 1, page: 2, ref: "Compressed tablet (plain tablet) are usually intended to provide rapid disintegration and drug release." },
+        { q: "Captopril is an example of a drug that best dissolves in the:", options: ["Upper GI tract", "Lower GI tract", "Colon", "Rectum"], correct: 0, page: 2, ref: "acidic drugs that best dissolve in the upper GI tract such as some antihypertensive drugs like captopril." },
+        { q: "Multiple compressed tablets are used to separate physically or chemically ____ ingredients.", options: ["Identical", "Incompatible", "Soluble", "Stable"], correct: 1, page: 2, ref: "This type is prepared to: A- To separate physically or chemically incompatible ingredients." },
+        { q: "What is the brand name for Amoxicillin + Clavulanic acid?", options: ["Zantac", "Augmentin", "Viagra", "Brufen"], correct: 1, page: 2, ref: "Amoxicillin+ Clavulanic acid | Brand name: Augmentin | Strength: 250+125 mg." },
+        { q: "The strength of Amoxicillin in Augmentin (250+125mg) is:", options: ["125 mg", "250 mg", "375 mg", "500 mg"], correct: 1, page: 2, ref: "Strength: 250+125 mg (250 for Amoxicillin, 125 for Clavulanic acid)." },
+        { q: "Chewable tablets are mainly made for:", options: ["Elderly only", "Children and people with swallowing difficulty", "Athletes", "Unconscious patients"], correct: 1, page: 2, ref: "Mainly made for children and people who have difficulty swallowing the intact tablet." },
+        { q: "Which drug brand is used for Asthma and COPD in chewable form?", options: ["Singulair", "Aspirin", "Gaviscon", "Erythrocin"], correct: 0, page: 3, ref: "montelukast | Brand name: Singulair | Uses: Asthma and COPD." },
+        { q: "What is the strength of Singulair mentioned in the file?", options: ["10 mg", "5 mg", "20 mg", "100 mg"], correct: 1, page: 3, ref: "montelukast | Brand name: Singulair | Strength: 5 mg." },
+        { q: "Aspirin 81 mg chewable is used as an:", options: ["Antibiotic", "Analgesic", "Antacid", "Antidiabetic"], correct: 1, page: 3, ref: "Acetyl salicylic acid | Brand: Aspirin | Strength: 81 mg | Uses: Analgesic." },
+        { q: "Calcium carbonate chewable tablets are used for deficiency of:", options: ["Vitamin C", "Vitamin D and Calcium", "Iron", "Vitamin B12"], correct: 1, page: 3, ref: "Calcium carbonate | Uses: Vitamin D and calcium deficiency." },
+        { q: "Gaviscon chewable tablets are used for:", options: ["Dyspepsia", "Diabetes", "Infection", "High blood pressure"], correct: 0, page: 3, ref: "Sodium alginate + potassium bicarbonate | Brand: Gaviscon | Uses: Dyspepsia." },
+        { q: "Sugar-coated tablets are coated to hide:", options: ["The drug color", "The smell or taste", "The drug price", "The tablet shape"], correct: 1, page: 3, ref: "to hide the smell or test of some medications." },
+        { q: "The sugar coating layer must be:", options: ["Insoluble", "Water soluble", "Acid resistant", "Fat soluble"], correct: 1, page: 3, ref: "The coating must be water soluble and quickly dissolves after swallowing." },
+        { q: "An example of a sugar-coated tablet is:", options: ["Viagra", "Flu-out", "Brufen", "Zantac"], correct: 1, page: 3, ref: "Example (flu-out) tablet." },
+        { q: "Film-coated tablets were developed as an alternative to sugar and ____ tablets.", options: ["Effervescent", "Enteric coated", "Plain", "Sublingual"], correct: 1, page: 3, ref: "Developed as an alternative way for enteric and sugar coated tablets." },
+        { q: "What is an advantage of film coating regarding tablet weight?", options: ["50% increase", "100% increase", "Little increase", "No increase"], correct: 2, page: 3, ref: "Little increase in tablet weight compared to about 50% increase in sugar coated tablets." },
+        { q: "Which coating has better mechanical strength due to elasticity?", options: ["Sugar coating", "Film coating", "Enteric coating", "Compressed coating"], correct: 1, page: 3, ref: "Better mechanical strength of the coating based on the elasticity and flexibility of the polymer coating." },
+        { q: "Film coating is better for certain diets because it avoids:", options: ["Water", "Sugar", "Polymers", "Starch"], correct: 1, page: 3, ref: "Avoidance of sugar which is contraindicated in the diets of a some people." },
+        { q: "Viagra is an example of a ____ tablet.", options: ["Sugar coated", "Film coated", "Enteric coated", "Effervescent"], correct: 1, page: 4, ref: "Example of film coated tablets: Sildenafil (Viagra)." },
+        { q: "Ciprodar (Ciprofloxacin) 500 mg is an:", options: ["Analgesic", "Antibiotic", "Antidiabetic", "Antacid"], correct: 1, page: 4, ref: "Ciprofloxacin | Brand: Ciprodar | Use: Antibiotic." },
+        { q: "Zantac (Ranitidine) 150 mg is used for:", options: ["GERD", "Asthma", "Diabetes", "Pain"], correct: 0, page: 4, ref: "Ranitidine | Brand: Zantac | Use: GERD." },
+        { q: "Enteric-coated shells do not dissolve in:", options: ["Intestine", "Gastric acid", "Water", "Blood"], correct: 1, page: 4, ref: "This shell does not dissolve in gastric acid but it will dissolve in the small or large intestine." },
+        { q: "Enteric coating is used to protect the ____ from irritation.", options: ["Mouth", "Stomach", "Esophagus", "Liver"], correct: 1, page: 4, ref: "These are usually used to protect the stomach from the irritation caused by some medications." },
+        { q: "A common material for enteric-coated tablets is:", options: ["Sugar", "Cellulose acetate phthalate", "Gelatin", "Starch"], correct: 1, page: 4, ref: "Cellulose acetate phthalate is a commonly used material for enteric-coated tablets." },
+        { q: "Brufen (Ibuprofen) 400mg is an example of ____ tablet.", options: ["Plain", "Enteric coated", "Sugar coated", "Sublingual"], correct: 1, page: 4, ref: "Examples of enteric coated tablets: Ibuprofen (Brufen)." },
+        { q: "Erythrocin (Erythromycin) 500 mg is an:", options: ["Enteric coated antibiotic", "Sugar coated antacid", "Film coated analgesic", "Plain vitamin"], correct: 0, page: 4, ref: "Erythromycin (Erythrocin) is listed under enteric coated tablets." },
+        { q: "Aspirin 100 mg enteric coated is used as an:", options: ["Antibiotic", "Analgesic", "Antidiabetic", "Antihypertensive"], correct: 1, page: 4, ref: "Acetyl salicylic acid (Aspirin) 100 mg | Use: Analgesic." },
+        { q: "Sustained release (SR) is designed to release API ____.", options: ["Immediately", "Gradually over extended period", "Only in the mouth", "Twice a day only"], correct: 1, page: 4, ref: "designed to release the active ingredient gradually over an extended period." },
+        { q: "Which releases API over a longer period than SR?", options: ["Plain tablets", "Extended release (ER)", "Effervescent", "Sublingual"], correct: 1, page: 4, ref: "Extended release tablets (ER): is slowly release their active ingredients over a longer period than SR." },
+        { q: "Voltarene (Diclofenac) 100 mg is an example of:", options: ["ER/SR tablet", "Sugar coated", "Chewable", "Plain"], correct: 0, page: 5, ref: "Diclofenac (Voltarene) is listed under SR and ER tablets." },
+        { q: "Glucophage (Metformin) 500 mg is used for:", options: ["Asthma", "Diabetes Melittes", "Pain", "GERD"], correct: 1, page: 5, ref: "Metformin (Glucophage) | Use: Diabetes Melittes." },
+        { q: "Lozenges are used for the:", options: ["Stomach", "Oral Cavity", "Vagina", "Intestine"], correct: 1, page: 1, ref: "Tablets used for Oral Cavity: sublingual tablets, lozenges." },
+        { q: "Sublingual tablets are placed:", options: ["In the stomach", "Under the tongue (Oral Cavity)", "In the ear", "In the eye"], correct: 1, page: 1, ref: "Tablets used for Oral Cavity: sublingual tablets." },
+        { q: "Effervescent tablets are categorized under:", options: ["Oral Cavity", "Used to Prepare Solutions", "Vaginal", "Plain"], correct: 1, page: 2, ref: "Tablet Used to Prepare Solutions: Effervescent tablets." },
+        { q: "Dispensing tablets are used to:", options: ["Prepare solutions", "Swallow directly", "Insert vaginally", "Chew"], correct: 0, page: 2, ref: "Tablet Used to Prepare Solutions: Dispensing tablets." },
+        { q: "Vaginal tablets are administered by:", options: ["Oral route", "Other routes", "Sublingual", "Preparation of solutions"], correct: 1, page: 1, ref: "Tablets Administered by Other Routes: Vaginal tablets." },
+        { q: "Antacids usually belong to which tablet type?", options: ["Sustained release", "Compressed plain (local GI effect)", "Enteric coated", "Vaginal"], correct: 1, page: 2, ref: "Most tablets containing drugs intended for local GI effects (such as antacids) and are of this type (Plain)." },
+        { q: "Which drug is used for GERD?", options: ["Sildenafil", "Ranitidine", "Amoxicillin", "Diclofenac"], correct: 1, page: 4, ref: "Ranitidine (Zantac) | Use: GERD." },
+        { q: "The strength of Brufen mentioned in the file is:", options: ["100 mg", "400, 200 mg", "500 mg", "81 mg"], correct: 1, page: 4, ref: "Ibuprofen (Brufen) | Strength: 400, 200 mg." },
+        { q: "Multiple compressed tablets are also used to produce ____ products.", options: ["Rapid action", "Prolonged action", "No action", "Single action"], correct: 1, page: 2, ref: "B- To produce multiple or prolonged action products." },
+        { q: "Film coating is less likely to be ____.", options: ["Effective", "Mistaken for sugar", "Water soluble", "Colorful"], correct: 1, page: 3, ref: "Less chance for film coated tablet to be mistaken for sugar." },
+        { q: "Singulair is used for Asthma and COPD. It is a:", options: ["Sugar coated tablet", "Chewable tablet", "Vaginal tablet", "Solution"], correct: 1, page: 3, ref: "Example of Chewable tablets: montelukast (Singulair)." },
+        { q: "Calcium carbonate chewable strength mentioned includes:", options: ["100 mg", "500 mg", "1000 mg", "250 mg"], correct: 1, page: 3, ref: "Calcium carbonate | Strength: 500 mg (among others)." },
+        { q: "Enteric coating protects drugs that can be ____ by gastric acid.", options: ["Activated", "Destroyed", "Colored", "Solidified"], correct: 1, page: 4, ref: "It is also applied to drugs that can be destroyed by gastric acid." },
+        { q: "Diclofenac (Voltarene) strength is:", options: ["500 mg", "100 mg", "400 mg", "50 mg"], correct: 1, page: 5, ref: "Diclofenac (Voltarene) | Strength: 100 mg." },
+        { q: "Tablets are a ____ unit dosage form.", options: ["Liquid", "Solid", "Gas", "Vapor"], correct: 1, page: 1, ref: "Tablets: may be defined as the solid unit dosage form." },
+        { q: "Film coating offers some control of the drug ____ profile.", options: ["Color", "Release", "Price", "Taste"], correct: 1, page: 3, ref: "offers some control of the drug release profile." },
+        { q: "Aspirin 100mg is enteric coated, while Aspirin 81mg is ____.", options: ["Plain", "Chewable", "Sublingual", "Vaginal"], correct: 1, page: 3, ref: "Aspirin 81mg is listed under Chewable (p3), 100mg under Enteric (p4)." },
+        { q: "ER tablets release ingredients throughout the ____.", options: ["Morning only", "Entire day or night", "One hour", "Meal time only"], correct: 1, page: 4, ref: "releasing the drug throughout the entire day or night." }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = quizData[currentQ];
+        document.getElementById('q-count').innerText = `السؤال ${currentQ + 1} من 50`;
+        document.getElementById('q-text').innerText = q.q;
+        
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        
+        q.options.forEach((opt, idx) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.innerText = opt;
+            div.onclick = () => checkAnswer(idx, div);
+            optionsContainer.appendChild(div);
+        });
+
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('next-btn').disabled = true;
+        updateProgress();
+    }
+
+    function checkAnswer(idx, element) {
+        const q = quizData[currentQ];
+        const allOptions = document.querySelectorAll('.option');
+        
+        allOptions.forEach(el => el.style.pointerEvents = 'none');
+
+        if (idx === q.correct) {
+            element.classList.add('correct');
+            score++;
+        } else {
+            element.classList.add('wrong');
+            allOptions[q.correct].classList.add('correct');
+            showExplanation(q);
+        }
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function showExplanation(q) {
+        const exp = document.getElementById('explanation');
+        document.getElementById('exp-content').innerText = q.ref;
+        document.getElementById('exp-page').innerText = `المصدر: صفحة رقم (${q.page})`;
+        exp.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < quizData.length) {
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function updateProgress() {
+        const prog = (currentQ / quizData.length) * 100;
+        document.getElementById('progress').style.width = prog + '%';
+    }
+
+    function finishQuiz() {
+        const body = document.getElementById('quiz-content');
+        const percentage = (score / quizData.length) * 100;
+        body.innerHTML = `
+            <div style="text-align:center; padding: 40px 0;">
+                <h2 style="color: var(--primary);">تم الانتهاء!</h2>
+                <div style="font-size: 4rem; margin: 20px 0;">${percentage}%</div>
+                <p>لقد أجبت على ${score} من أصل 50 سؤالاً بشكل صحيح.</p>
+                <button class="btn btn-next" onclick="location.reload()" style="background:var(--dark)">إعادة الاختبار</button>
+            </div>
+        `;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('progress').style.width = '100%';
+    }
+
+    // تشغيل السؤال الأول عند تحميل الصفحة
+    window.onload = loadQuestion;
+</script>
+</body>
+</html>

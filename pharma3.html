@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الصيدلة - المحاضرة الثالثة</title>
+    <style>
+        :root {
+            --primary: #4a69bd;
+            --secondary: #6a89cc;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --light: #f1f2f6;
+            --dark: #2f3542;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        #quiz-wrapper {
+            width: 95%;
+            max-width: 800px;
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .quiz-header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            height: 8px;
+            background: #dfe4ea;
+            width: 100%;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .quiz-body {
+            padding: 30px;
+            min-height: 350px;
+        }
+
+        .question-number {
+            color: var(--secondary);
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            direction: ltr;
+        }
+
+        .option {
+            background: var(--light);
+            border: 2px solid transparent;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+
+        .option:hover {
+            background: #e1e4ea;
+        }
+
+        .option.correct {
+            background: #d4edda !important;
+            border-color: var(--success) !important;
+            color: #155724;
+        }
+
+        .option.wrong {
+            background: #f8d7da !important;
+            border-color: var(--danger) !important;
+            color: #721c24;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff9db;
+            border-right: 5px solid var(--warning);
+            border-radius: 8px;
+            display: none;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .quiz-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .btn-next {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-next:disabled {
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-wrapper">
+    <div class="quiz-header">
+        <h1 style="margin:0; font-size:1.2rem;">اختبار المحاضرة الثالثة | Lec 3</h1>
+        <div class="score-badge">النتيجة: <span id="score">0</span> / 50</div>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div class="quiz-body" id="quiz-content">
+        <span class="question-number" id="q-count">السؤال 1 من 50</span>
+        <div id="q-text" class="question-text"></div>
+        <div id="options" class="options-grid"></div>
+        
+        <div id="explanation" class="explanation">
+            <strong>نص توضيحي من الملف:</strong>
+            <p id="exp-content" style="margin:5px 0;"></p>
+            <small id="exp-page" style="color: #666;"></small>
+        </div>
+    </div>
+
+    <div class="quiz-footer">
+        <button id="next-btn" class="btn btn-next" onclick="nextQuestion()" disabled>السؤال التالي</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "Which type of tablet is the most common in the Oral Cavity category?", options: ["Lozenges", "Sublingual tablets", "Vaginal tablets", "Effervescent tablets"], correct: 1, page: 2, ref: "Sublingual tablets: The most common type in this category (Tablets used for oral cavity)." },
+        { q: "Sublingual tablets are designed to release their active component through the:", options: ["Stomach lining", "Oral mucosa", "Small intestine", "Liver"], correct: 1, page: 2, ref: "designed to dissolve and release their active component rapidly and in a small volume to be absorbed via the oral mucosa." },
+        { q: "What is a major advantage of sublingual tablets regarding metabolism?", options: ["Increase first-pass metabolism", "Avoid first-pass metabolism", "Slow down absorption", "Pass through the liver first"], correct: 1, page: 2, ref: "Drugs pass directly to the systemic circulation and avoid first-pass metabolism." },
+        { q: "Which drug is an example of a sublingual tablet for angina?", options: ["Cefixime", "Nitroglycerine", "Vitamin C", "Aspirin"], correct: 1, page: 2, ref: "An example of that is the nitroglycerine tablet (angised®) for angina." },
+        { q: "Lozenges tablets are intended to exert their effect in the:", options: ["Stomach", "Mouth or throat", "Vagina", "Large intestine"], correct: 1, page: 2, ref: "Lozenges tablets: Used in the oral cavity and intended to exert their effect in the mouth or throat." },
+        { q: "Unlike other oral cavity tablets, lozenges are designed to:", options: ["Disintegrate rapidly", "Dissolve slowly", "Be swallowed intact", "Be used as injections"], correct: 1, page: 2, ref: "This type are designed to dissolve slowly in the mouth and not to disintegrate." },
+        { q: "Vaginal tablets are designed for:", options: ["Rapid disintegration", "Slow dissolution and drug release", "Systemic circulation only", "Oral administration"], correct: 1, page: 2, ref: "Designed to undergo slow dissolution and drug release in the vaginal cavity." },
+        { q: "What is the typical shape of vaginal tablets?", options: ["Square", "Round", "Oval", "Triangular"], correct: 2, page: 2, ref: "They are usually oval in shape and come with an applicator." },
+        { q: "Which drug is an example of a vaginal antifungal tablet?", options: ["Clotrimazole", "Paracetamol", "Nitroglycerine", "Cefixime"], correct: 0, page: 2, ref: "Drug name: Clotrimazole | Brand name: Canesten | Uses: Antifungal." },
+        { q: "The brand name 'Canesten' 100mg refers to which drug?", options: ["Aspirin", "Vitamin C", "Clotrimazole", "Nitroglycerine"], correct: 2, page: 2, ref: "Clotrimazole | Brand name: Canesten | Strength: 100 mg." },
+        { q: "Effervescent tablets release which gas during dissolution?", options: ["Oxygen", "Carbon dioxide (CO2)", "Nitrogen", "Hydrogen"], correct: 1, page: 3, ref: "Designed to make solution rapidly with simultaneous release of carbon dioxide (CO2)." },
+        { q: "Effervescent tablets usually contain citric acid and:", options: ["Sodium chloride", "Sodium bicarbonate", "Calcium carbonate", "Cellulose"], correct: 1, page: 3, ref: "These tablets usually contain citric acid plus sodium bicarbonate." },
+        { q: "A patient benefit of effervescent tablets is that they:", options: ["Are harder to swallow", "Are highly accepted by patients", "Contain less active ingredient", "Taste like stomach acid"], correct: 1, page: 3, ref: "The advantages: 1. They are highly accepted by patients." },
+        { q: "Compared to liquid forms, effervescent tablets provide:", options: ["Inaccurate doses", "An accurate dose", "No dose control", "Slower absorption"], correct: 1, page: 3, ref: "The advantages: 2. Provide an accurate dose compare to liquid dosage form." },
+        { q: "How can effervescent tablets protect the stomach?", options: ["By coating it with sugar", "By adjusting the pH of the resulting solution", "By dissolving in the intestine", "By being very large"], correct: 1, page: 3, ref: "3. Can be designed to protect stomach, where the PH of the resulted solution can be adjusted." },
+        { q: "Vitamin C 1000mg effervescent tablets are used for:", options: ["Pain relief", "Immune support", "Antifungal", "Angina"], correct: 1, page: 3, ref: "Vitamin C | 1000 mg | Uses: Immune support." },
+        { q: "What is the brand name for Aspirin 325mg effervescent?", options: ["Pando", "Alka-Seltzer", "Angised", "Suprax"], correct: 1, page: 3, ref: "Aspirin | Brand name: Alka-Seltzer | Strength: 325 mg." },
+        { q: "Paracetamol (Pando) effervescent tablets are available in strengths of:", options: ["100 mg", "500 and 1000 mg", "325 mg", "100 mg"], correct: 1, page: 3, ref: "Paracetamol | Brand: Pando | Strength: 500, 1000 mg." },
+        { q: "Dispensing tablets were traditionally used by the:", options: ["Patient directly", "Pharmacist to prepare solutions", "Surgeon", "Nurse"], correct: 1, page: 3, ref: "Dispensing tablets: An old form of tablets that were used by the pharmacist to prepare a drug solution." },
+        { q: "What is a characteristic of dispensing tablets?", options: ["Lower drug amount", "Larger amount of active ingredient", "Sugar coated", "For oral ingestion only"], correct: 1, page: 3, ref: "It contains a larger amount of active ingredient than usual tablets." },
+        { q: "Cefixime (Suprax) 400mg is an example of an:", options: ["Effervescent tablet", "Enteric coated antibiotic", "Sublingual tablet", "Vaginal tablet"], correct: 1, page: 3, ref: "Drug: Cefixime | Brand: Suprax | Uses: Antibiotic (Listed under Enteric coated table on page 3)." },
+        { q: "The brand name 'Angised' belongs to:", options: ["Paracetamol", "Nitroglycerine", "Cefixime", "Clotrimazole"], correct: 1, page: 2, ref: "An example of that is the nitroglycerine tablet (angised®)." },
+        { q: "Vaginal tablets are usually supplied with an:", options: ["Inhaler", "Applicator", "Syringe", "Cup"], correct: 1, page: 2, ref: "They are usually oval in shape and come with an applicator." },
+        { q: "Which tablet type has a more rapid onset of action due to systemic bypass?", options: ["Lozenges", "Sublingual", "Enteric coated", "Sugar coated"], correct: 1, page: 2, ref: "Results in a more rapid onset of drug action (Sublingual)." },
+        { q: "The pH of the solution from an effervescent tablet can be:", options: ["Adjusted", "Unstable", "Extremely acidic only", "Ignored"], correct: 0, page: 3, ref: "where the PH of the resulted solution can be adjusted." },
+        // تكرار الأسئلة لتعزيز الحفظ وتغطية الـ 50 سؤالاً
+        { q: "Sublingual absorption bypasses the:", options: ["Mouth", "Liver (First-pass)", "Lungs", "Heart"], correct: 1, page: 2, ref: "Drugs pass directly to the systemic circulation and avoid first-pass metabolism." },
+        { q: "Clotrimazole is used as an:", options: ["Antibiotic", "Antifungal", "Analgesic", "Immune booster"], correct: 1, page: 2, ref: "Clotrimazole | Uses: Antifungal." },
+        { q: "Effervescent tablets contain ____ and sodium bicarbonate.", options: ["Citric acid", "Hydrochloric acid", "Sulfuric acid", "Acetic acid"], correct: 0, page: 3, ref: "These tablets usually contain citric acid plus sodium bicarbonate." },
+        { q: "Which of the following is NOT an oral cavity tablet?", options: ["Sublingual", "Lozenges", "Vaginal tablets", "None of the above"], correct: 2, page: 1, ref: "Vaginal tablets are administered by Other Routes." },
+        { q: "Which paracetamol brand is effervescent?", options: ["Suprax", "Pando", "Canesten", "Angised"], correct: 1, page: 3, ref: "Paracetamol | Brand: Pando." },
+        { q: "Suprax 400mg is used as an:", options: ["Antifungal", "Antibiotic", "Pain killer", "Antacid"], correct: 1, page: 3, ref: "Cefixime (Suprax) | Uses: Antibiotic." },
+        { q: "What gas makes 'effervescence'?", options: ["O2", "CO2", "N2", "CO"], correct: 1, page: 3, ref: "simultaneous release of carbon dioxide (CO2)." },
+        { q: "The strength of Nitroglycerine is not mentioned but it's used for:", options: ["Fever", "Angina", "Cough", "Skin rash"], correct: 1, page: 2, ref: "nitroglycerine tablet (angised®) for angina." },
+        { q: "Which tablet is designed NOT to disintegrate?", options: ["Effervescent", "Lozenges", "Sublingual", "Plain"], correct: 1, page: 2, ref: "Lozenges are designed to dissolve slowly in the mouth and not to disintegrate." },
+        { q: "Alka-Seltzer is a brand for:", options: ["Vitamin C", "Aspirin", "Paracetamol", "Cefixime"], correct: 1, page: 3, ref: "Aspirin | Brand name: Alka-Seltzer." },
+        { q: "Dispensing tablets are an ____ form of tablets.", options: ["Modern", "Old", "Experimental", "Illegal"], correct: 1, page: 3, ref: "Dispensing tablets: An old form of tablets." },
+        { q: "Accurate dosing is an advantage of:", options: ["Liquid medicine", "Effervescent tablets", "Powders", "Creams"], correct: 1, page: 3, ref: "Provide an accurate dose compare to liquid dosage form." },
+        { q: "Canesten strength is:", options: ["500 mg", "100 mg", "400 mg", "1000 mg"], correct: 1, page: 2, ref: "Clotrimazole (Canesten) | Strength: 100 mg." },
+        { q: "Vitamin C effervescent strength is:", options: ["500 mg", "1000 mg", "250 mg", "100 mg"], correct: 1, page: 3, ref: "Vitamin C | Strength: 1000 mg." },
+        { q: "Angised is used for angina via which route?", options: ["Oral ingestion", "Sublingual", "Vaginal", "Topical"], correct: 1, page: 2, ref: "Example of that (sublingual) is the nitroglycerine tablet (angised®)." },
+        { q: "Suprax (Cefixime) is an ____ tablet.", options: ["Sugar coated", "Enteric coated", "Effervescent", "Sublingual"], correct: 1, page: 3, ref: "Examples of enteric coated tablets: Suprax (Page 3)." },
+        { q: "Sublingual tablets dissolve in a ____ volume.", options: ["Large", "Small", "Medium", "Infinite"], correct: 1, page: 2, ref: "designed to dissolve and release their active component rapidly and in a small volume." },
+        { q: "Lozenges exert effects in the throat or ____.", options: ["Stomach", "Mouth", "Intestine", "Lungs"], correct: 1, page: 2, ref: "intended to exert their effect in the mouth or throat." },
+        { q: "Vaginal tablets undergo ____ dissolution.", options: ["Rapid", "Slow", "Instant", "No"], correct: 1, page: 2, ref: "Designed to undergo slow dissolution." },
+        { q: "Pando comes in 500mg and ____ mg.", options: ["100", "1000", "200", "750"], correct: 1, page: 3, ref: "Paracetamol (Pando) | Strength: 500, 1000 mg." },
+        { q: "Effervescent tablets make solution ____.", options: ["Slowly", "Rapidly", "Overnight", "Never"], correct: 1, page: 3, ref: "Designed to make solution rapidly." },
+        { q: "Citric acid is used in which tablets?", options: ["Plain", "Effervescent", "Lozenges", "Enteric"], correct: 1, page: 3, ref: "Effervescent tablets usually contain citric acid." },
+        { q: "Clotrimazole brand name is:", options: ["Suprax", "Canesten", "Pando", "Singulair"], correct: 1, page: 2, ref: "Clotrimazole | Brand: Canesten." },
+        { q: "Which tablet has a larger amount of API for compounding?", options: ["Dispensing", "Sugar coated", "Sublingual", "Vaginal"], correct: 0, page: 3, ref: "Dispensing tablets: It contains a larger amount of active ingredient than usual tablets." },
+        { q: "Sublingual tablets pass directly into ____.", options: ["Gastric acid", "Systemic circulation", "Feces", "Urine"], correct: 1, page: 2, ref: "Drugs pass directly to the systemic circulation." }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = quizData[currentQ];
+        document.getElementById('q-count').innerText = `السؤال ${currentQ + 1} من ${quizData.length}`;
+        document.getElementById('q-text').innerText = q.q;
+        
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        
+        q.options.forEach((opt, idx) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.innerText = opt;
+            div.onclick = () => checkAnswer(idx, div);
+            optionsContainer.appendChild(div);
+        });
+
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('next-btn').disabled = true;
+        updateProgress();
+    }
+
+    function checkAnswer(idx, element) {
+        const q = quizData[currentQ];
+        const allOptions = document.querySelectorAll('.option');
+        
+        allOptions.forEach(el => el.style.pointerEvents = 'none');
+
+        if (idx === q.correct) {
+            element.classList.add('correct');
+            score++;
+        } else {
+            element.classList.add('wrong');
+            allOptions[q.correct].classList.add('correct');
+            showExplanation(q);
+        }
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function showExplanation(q) {
+        const exp = document.getElementById('explanation');
+        document.getElementById('exp-content').innerText = q.ref;
+        document.getElementById('exp-page').innerText = `المصدر: صفحة رقم (${q.page})`;
+        exp.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < quizData.length) {
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function updateProgress() {
+        const prog = (currentQ / quizData.length) * 100;
+        document.getElementById('progress').style.width = prog + '%';
+    }
+
+    function finishQuiz() {
+        const body = document.getElementById('quiz-content');
+        const percentage = (score / quizData.length) * 100;
+        body.innerHTML = `
+            <div style="text-align:center; padding: 40px 0;">
+                <h2 style="color: var(--primary);">تم الانتهاء من Lec 3!</h2>
+                <div style="font-size: 4rem; margin: 20px 0;">${percentage}%</div>
+                <p>لقد أجبت على ${score} من أصل 50 سؤالاً بشكل صحيح.</p>
+                <button class="btn btn-next" onclick="location.reload()" style="background:var(--dark)">إعادة اختبار Lec 3</button>
+            </div>
+        `;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('progress').style.width = '100%';
+    }
+
+    window.onload = loadQuestion;
+</script>
+</body>
+</html>

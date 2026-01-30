@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الإليكسير - Lec 6</title>
+    <style>
+        :root { 
+            --p: #2c3e50; 
+            --s: #27ae60; 
+            --bg: #f0f2f5; 
+            --white: #ffffff;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0;
+            display: flex; 
+            justify-content: center; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #quiz-card { 
+            background: var(--white); 
+            width: 100%; 
+            max-width: 900px; /* تم تكبير العرض */
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header { 
+            background: var(--p); 
+            color: white; 
+            padding: 30px; 
+            text-align: center;
+            border-bottom: 5px solid var(--s);
+        }
+
+        .header h3 { margin: 0; font-size: 1.8rem; }
+        .score-info { font-size: 1.2rem; margin-top: 10px; opacity: 0.9; }
+
+        .progress { height: 8px; background: #e9ecef; }
+        #bar { height: 100%; background: var(--s); width: 0%; transition: 0.4s; }
+
+        .content { padding: 40px; flex-grow: 1; }
+        
+        #q-num { color: var(--s); font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: block; }
+        
+        .q-text { 
+            font-size: 1.6rem; /* تكبير خط السؤال */
+            margin-bottom: 30px; 
+            direction: ltr; 
+            text-align: left; 
+            line-height: 1.4;
+            color: #1a1a1a;
+        }
+
+        .options { 
+            display: grid; 
+            gap: 15px; 
+            direction: ltr; 
+        }
+
+        .opt { 
+            padding: 20px; 
+            border: 2px solid #edeff2; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 1.3rem; /* تكبير خط الخيارات */
+            background: #fdfdfd;
+        }
+
+        .opt:hover { 
+            background: #f1f4f9; 
+            border-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+
+        .footer { 
+            padding: 30px 40px; 
+            background: #fafafa; 
+            border-top: 1px solid #eee; 
+            display: flex; 
+            justify-content: flex-end; 
+        }
+
+        .btn { 
+            padding: 15px 45px; 
+            border-radius: 10px; 
+            border: none; 
+            cursor: pointer; 
+            background: var(--p); 
+            color: white; 
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background: #1a252f; }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+        .exp { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background: #fff9db; 
+            border-right: 6px solid #ffc107; 
+            border-radius: 8px; 
+            display: none; 
+            font-size: 1.1rem; 
+            line-height: 1.6;
+            text-align: right;
+            direction: rtl;
+        }
+
+        @media (max-width: 600px) {
+            .q-text { font-size: 1.3rem; }
+            .opt { font-size: 1.1rem; padding: 15px; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-card">
+    <div class="header">
+        <h3>المحاضرة السادسة: Elixirs</h3>
+        <div class="score-info">النتيجة الحالية: <span id="score">0</span> من 50</div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="content">
+        <span id="q-num"></span>
+        <div id="q-text" class="q-text"></div>
+        <div id="options" class="options"></div>
+        <div id="explanation" class="exp"></div>
+    </div>
+    <div class="footer">
+        <button id="next-btn" class="btn" onclick="nextQ()" disabled>السؤال التالي ←</button>
+    </div>
+</div>
+
+<script>
+    // تم الحفاظ على نفس مصفوفة الأسئلة الـ 50 العلمية الدقيقة
+    const quizData = [
+        { q: "Elixirs are defined as clear, sweetened, ____ solutions for oral use.", options: ["Aqueous", "Hydroalcoholic", "Oily", "Suspension"], correct: 1, page: 1, ref: "Elixir are clear, sweetened, hydroalcoholic solutions for oral use." },
+        { q: "In official elixirs, the alcohol content varies from:", options: ["1% to 5%", "4% to 40%", "50% to 70%", "90% to 95%"], correct: 1, page: 1, ref: "In the official elixirs, the alcohol content varies from 4 to 40 percent." },
+        { q: "Alcohol in elixirs is primarily used to keep volatile oils or medicinal substances in:", options: ["Precipitation", "Solution", "Emulsion", "Solid state"], correct: 1, page: 1, ref: "just enough alcohol to keep volatile oil or the medicinal substances in solution." },
+        { q: "Which are frequently used as adjunct solvents in elixirs?", options: ["Benzene", "Glycerin and Propylene glycol", "Ether", "Acetone"], correct: 1, page: 1, ref: "other solvents, such as glycerin and propylene glycol are frequently employed." },
+        { q: "Why is saccharin used in high-alcohol elixirs instead of sucrose?", options: ["Saccharin is cheaper", "Sucrose is only slightly soluble in alcohol", "Saccharin is more natural", "Sucrose causes cloudiness"], correct: 1, page: 1, ref: "saccharin... rather than sucrose which is only slightly soluble in alcohol." },
+        { q: "Elixirs are self-preserving if they contain over ____ alcohol.", options: ["2%", "5%", "10 to 12%", "25%"], correct: 2, page: 1, ref: "Elixirs containing over 10 to 12% of alcohol are usually self-preserving." },
+        { q: "What is added to all elixirs to increase their palatability?", options: ["Preservatives", "Flavoring materials", "Coloring agents", "Stabilizers"], correct: 1, page: 1, ref: "All elixirs contain flavoring materials to increase their palatability." },
+        { q: "Non-medicated elixirs are primarily used as ____.", options: ["Main treatment", "Vehicles for medicated elixirs", "Antidotes", "Antibiotics"], correct: 1, page: 2, ref: "Non medicated elixirs: Which is used as vehicles in preparing medicated elixir." },
+        { q: "Which is considered the most widely used non-medicated elixir?", options: ["Iso-alcoholic elixir", "Aromatic elixir", "Compound benzaldehyde elixir", "Phenobarbital elixir"], correct: 1, page: 2, ref: "Aromatic elixir: Is the most widely used." },
+        { q: "Aromatic elixir consists of compound orange spirit, syrup, alcohol, water, and:", options: ["Starch", "Talc", "Sugar crystals", "Gelatin"], correct: 1, page: 2, ref: "It consists of compound orange spirit, syrup, alcohol, water, and talc." },
+        { q: "The sugar content of aromatic elixir is about ____ percent.", options: ["10%", "31%", "65%", "85%"], correct: 1, page: 2, ref: "The sugar content of aromatic elixir is about 31 percent." },
+        { q: "Which elixir is preferred when a bitter almond-like flavor is needed?", options: ["Aromatic", "Compound benzaldehyde", "Iso-alcoholic", "Digoxin"], correct: 1, page: 2, ref: "Compound benzaldehyde elixir... used when a bitter almond-like flavor is desired." },
+        { q: "Iso-alcoholic elixir is composed of ____ separate parts.", options: ["One", "Two", "Three", "Four"], correct: 1, page: 2, ref: "It is composed of two separate parts (low and high alcoholic)." },
+        { q: "The high alcoholic part of iso-alcoholic elixir contains:", options: ["8-10% alcohol", "21-23% alcohol", "73-78% alcohol", "95-100% alcohol"], correct: 2, page: 2, ref: "high alcoholic elixir with an alcohol content of from 73 to 78 percent." },
+        { q: "What is the largest group of medicated elixirs?", options: ["Analgesics", "Antihistamine elixirs", "Cardio tonics", "Expectorants"], correct: 1, page: 3, ref: "Antihistamine elixirs: This is the largest group of elixirs." },
+        { q: "The second largest group of medicated elixirs is:", options: ["Antihistamines", "Sedatives and Hypnotics", "Corticosteroids", "Cough preparations"], correct: 1, page: 3, ref: "Sedatives and Hypnotics elixirs: This is the second largest group." },
+        { q: "Barbiturate-type elixirs in low dosage are used as:", options: ["Hypnotics", "Sedatives", "Stimulants", "Painkillers"], correct: 1, page: 3, ref: "used in low dosage as sedatives and in higher dosage as hypnotics." },
+        { q: "Which elixir is used as a cardio tonic?", options: ["Acetaminophen", "Digoxin", "Dexamethasone", "Terpin Hydrate"], correct: 1, page: 3, ref: "Digoxin Elixir USP, is used as a cardio tonic." },
+        { q: "Which elixir is used in the treatment of rheumatoid arthritis?", options: ["Phenobarbital", "Dexamethasone", "Digoxin", "Aromatic"], correct: 1, page: 3, ref: "Dexamethasone Elixir, which used in the treatment of rheumatoid arthritis." },
+        { q: "What is a significant advantage of elixirs?", options: ["High sugar content", "Self preservative", "Zero alcohol", "Opaque color"], correct: 1, page: 3, ref: "Advantages of elixir: Self preservative." },
+        { q: "Liver sclerosis and addiction are ____ of elixirs.", options: ["Advantages", "Disadvantages", "Components", "Additives"], correct: 1, page: 3, ref: "Disadvantages of elixir: Addiction, Liver sclerosis." },
+        { q: "A burning sensation to the tongue in elixirs is caused by:", options: ["Sugar", "Large amount of alcohol", "Coloring agents", "Purified water"], correct: 1, page: 3, ref: "Large amount of alcohol cause burning sensation to tongue." },
+        { q: "Compared to elixirs, syrups are:", options: ["Less sweet", "High sweet", "Less viscous", "Alcohol-heavy"], correct: 1, page: 4, ref: "Syrup: High sweet because they contain high proportion of sugar." },
+        { q: "Which formulation is better at maintaining water and alcohol soluble components?", options: ["Syrup", "Elixir", "Pure Water", "Suspension"], correct: 1, page: 4, ref: "Elixir: Better able to maintain both water-soluble and alcohol-soluble components." },
+        { q: "Elixirs are ____ effective in masking taste than syrups.", options: ["More", "Less", "Equally", "Extremely"], correct: 1, page: 4, ref: "Elixir: Less effective in masking the taste." },
+        { q: "Purified water and alcohol are considered the ____ in elixirs.", options: ["Additives", "Vehicle", "Stabilizers", "Sweeteners"], correct: 1, page: 3, ref: "Vehicle: Purified water and alcohol is used to prepare elixir." },
+        { q: "Chemical stabilizers and coloring agents are categorized as:", options: ["Main solvents", "Additives", "Active ingredients", "Impurity"], correct: 1, page: 3, ref: "Additives: Chemical Stabilizers, Colouring agents..." },
+        { q: "The sugar content in aromatic elixir is about ____ of syrup.", options: ["Double", "Less than half", "Exactly same", "Zero"], correct: 1, page: 2, ref: "sugar content... is... less than half that of syrup." },
+        { q: "Antihistamine elixirs provide relief for certain ____ disorders.", options: ["Cardiac", "Allergic", "Digestive", "Mental"], correct: 1, page: 3, ref: "relief of certain allergic disorders." },
+        { q: "Terpin Hydrate Elixir is used as an ____.", options: ["Analgesic", "Expectorant", "Sedative", "Antacid"], correct: 1, page: 3, ref: "Expectorants and cough preparation: For example Terpin Hydrate Elixir." },
+        { q: "Sedation and dizziness are common disadvantages of elixirs. (T/F)", options: ["True", "False"], correct: 0, page: 3, ref: "Disadvantages: Sedation, Dizziness." },
+        { q: "Iso-alcoholic elixir allows for specific alcohol ranges. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "iso-alcoholic elixir... alcohol content within the ranges required." },
+        { q: "Low alcoholic elixir contains ____ percent alcohol.", options: ["2-4%", "8-10%", "20-25%", "50%"], correct: 1, page: 2, ref: "low alcoholic elixir... 8 to 10 percent." },
+        { q: "All elixirs are hydroalcoholic. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "Elixir are... hydroalcoholic solutions." },
+        { q: "Saccharin is used because it is required in ____ amounts.", options: ["Large", "Small", "Huge", "Infinite"], correct: 1, page: 1, ref: "saccharin, which is required only in small amounts." },
+        { q: "Elixirs are always clear. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "Elixir are clear... solutions." },
+        { q: "Alcohol content in Aromatic Elixir is between:", options: ["5-10%", "21-23%", "40-50%", "70-80%"], correct: 1, page: 2, ref: "alcohol content is from 21 to 23percent." },
+        { q: "Acetaminophen Elixir is used as an analgesic. (T/F)", options: ["True", "False"], correct: 0, page: 3, ref: "Acetaminophen Elixir which is used as analgesic." },
+        { q: "One disadvantage of elixir is addiction. (T/F)", options: ["True", "False"], correct: 0, page: 3, ref: "Disadvantages: Addiction." },
+        { q: "Glycerin helps in the solubility of ingredients. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "glycerin... employed in elixirs as adjunct solvents." },
+        { q: "Syrups are more viscous than elixirs. (T/F)", options: ["True", "False"], correct: 0, page: 4, ref: "Character: Viscosity | Syrup: High | Elixir: Low." },
+        { q: "Elixirs are easier to prepare than syrups. (T/F)", options: ["True", "False"], correct: 0, page: 4, ref: "Preparation: Syrup: Need heat | Elixir: Simple solution." },
+        { q: "Phenobarbital Elixir is a medicated elixir. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Medicated elixirs... e.g. Phenobarbital elixir." },
+        { q: "Coloring agents enhance the appearance of elixirs. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "coloring agent to enhance their appearance." },
+        { q: "Alcohol acts as a preservative in elixirs above 10%. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "over 10 to 12%... are usually self-preserving." },
+        { q: "Elixirs are used for systemic effect via oral route. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "hydroalcoholic solutions for oral use." },
+        { q: "The sugar in aromatic elixir is sucrose. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Aromatic elixir... sugar content... is 31 percent." },
+        { q: "Antihistamine elixirs are used for cough. (T/F)", options: ["True", "False"], correct: 1, page: 3, ref: "Antihistamine... relief of certain allergic disorders." },
+        { q: "Propylene glycol is a solvent. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "propylene glycol are frequently employed... as adjunct solvents." },
+        { q: "Elixirs are always flavored. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "usually flavored to enhance their palatability." }
+    ];
+
+    let current = 0, score = 0;
+
+    function loadQ() {
+        const q = quizData[current];
+        document.getElementById('q-num').innerText = `السؤال ${current + 1} من 50`;
+        document.getElementById('q-text').innerText = q.q;
+        const container = document.getElementById('options');
+        container.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'opt';
+            div.innerText = opt;
+            div.onclick = () => check(i, div);
+            container.appendChild(div);
+        });
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('bar').style.width = ((current+1)/50*100) + '%';
+    }
+
+    function check(idx, el) {
+        const q = quizData[current];
+        const opts = document.querySelectorAll('.opt');
+        opts.forEach(o => o.style.pointerEvents = 'none');
+        if(idx === q.correct) {
+            el.classList.add('correct');
+            score++;
+        } else {
+            el.classList.add('wrong');
+            opts[q.correct].classList.add('correct');
+        }
+        document.getElementById('score').innerText = score;
+        const exp = document.getElementById('explanation');
+        exp.innerHTML = `<b>النص العلمي:</b> ${q.ref} <br><small>المصدر: صفحة رقم (${q.page})</small>`;
+        exp.style.display = 'block';
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function nextQ() {
+        current++;
+        if(current < 50) loadQ();
+        else {
+            document.getElementById('quiz-card').innerHTML = `
+            <div style="padding:80px 40px; text-align:center;">
+                <h2 style="font-size: 2.5rem; color: var(--p);">انتهى الاختبار!</h2>
+                <h1 style="font-size: 5rem; color: var(--s);">${(score/50*100)}%</h1>
+                <p style="font-size: 1.5rem;">لقد نجحت في الإجابة على ${score} من أصل 50 سؤالاً.</p>
+                <button class="btn" onclick="location.reload()" style="margin-top:30px;">إعادة الاختبار</button>
+            </div>`;
+        }
+    }
+
+    window.onload = loadQ;
+</script>
+</body>
+</html>
