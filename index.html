@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار المحاليل - Lec 7</title>
+    <style>
+        :root { 
+            --p: #2c3e50; 
+            --s: #27ae60; 
+            --bg: #f0f2f5; 
+            --white: #ffffff;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0;
+            display: flex; 
+            justify-content: center; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #quiz-card { 
+            background: var(--white); 
+            width: 100%; 
+            max-width: 900px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header { 
+            background: var(--p); 
+            color: white; 
+            padding: 30px; 
+            text-align: center;
+            border-bottom: 5px solid var(--s);
+        }
+
+        .header h3 { margin: 0; font-size: 1.8rem; }
+        .score-info { font-size: 1.2rem; margin-top: 10px; opacity: 0.9; }
+
+        .progress { height: 8px; background: #e9ecef; }
+        #bar { height: 100%; background: var(--s); width: 0%; transition: 0.4s; }
+
+        .content { padding: 40px; flex-grow: 1; }
+        
+        #q-num { color: var(--s); font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: block; }
+        
+        .q-text { 
+            font-size: 1.6rem; 
+            margin-bottom: 30px; 
+            direction: ltr; 
+            text-align: left; 
+            line-height: 1.4;
+            color: #1a1a1a;
+        }
+
+        .options { 
+            display: grid; 
+            gap: 15px; 
+            direction: ltr; 
+        }
+
+        .opt { 
+            padding: 20px; 
+            border: 2px solid #edeff2; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 1.3rem; 
+            background: #fdfdfd;
+        }
+
+        .opt:hover { 
+            background: #f1f4f9; 
+            border-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+
+        .footer { 
+            padding: 30px 40px; 
+            background: #fafafa; 
+            border-top: 1px solid #eee; 
+            display: flex; 
+            justify-content: flex-end; 
+        }
+
+        .btn { 
+            padding: 15px 45px; 
+            border-radius: 10px; 
+            border: none; 
+            cursor: pointer; 
+            background: var(--p); 
+            color: white; 
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background: #1a252f; }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+        .exp { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background: #fff9db; 
+            border-right: 6px solid #ffc107; 
+            border-radius: 8px; 
+            display: none; 
+            font-size: 1.1rem; 
+            line-height: 1.6;
+            text-align: right;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-card">
+    <div class="header">
+        <h3>المحاضرة السابعة: Solutions</h3>
+        <div class="score-info">النتيجة الحالية: <span id="score">0</span> من 50</div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="content">
+        <span id="q-num"></span>
+        <div id="q-text" class="q-text"></div>
+        <div id="options" class="options"></div>
+        <div id="explanation" class="exp"></div>
+    </div>
+    <div class="footer">
+        <button id="next-btn" class="btn" onclick="nextQ()" disabled>السؤال التالي ←</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "Solutions are liquid preparations containing one or more substances dissolved in a ____.", options: ["Gas", "Solid", "Liquid solvent", "Suspension"], correct: 2, page: 1, ref: "Solution: Are liquid preparations that contain one or more soluble chemical substances dissolved in liquid solvent." },
+        { q: "The primary solvent used for preparing official solutions is:", options: ["Alcohol", "Glycerin", "Water", "Glycol"], correct: 2, page: 1, ref: "The solvent used for preparing official solution is water." },
+        { q: "Which substances make oral solutions more attractive and palatable?", options: ["Stabilizers", "Flavorants and colorants", "Preservatives", "Pyrogens"], correct: 1, page: 1, ref: "Oral solutions... contain flavorants and colorants to make the medication more attractive and palatable." },
+        { q: "What is added to oral solutions to prevent microbial growth?", options: ["Flavorants", "Stabilizers", "Preservatives", "Pyrogens"], correct: 2, page: 1, ref: "preservatives to prevent the growth of microorganisms in the solution." },
+        { q: "In ophthalmic solutions, what is one of the most important considerations?", options: ["Sweetness", "Sterility", "Viscosity", "Color"], correct: 1, page: 1, ref: "Ophthalmic solution: The sterility is one of the important consideration in their preparation." },
+        { q: "The preferred method of sterilizing ophthalmic solutions in their final container is:", options: ["Filtration", "Dry heat", "Autoclaving", "Freezing"], correct: 2, page: 2, ref: "Autoclaving in the final container is the preferred method of sterilizing ophthalmic solutions." },
+        { q: "Which are examples of otic and nasal solutions?", options: ["IV fluids", "Inhalation and nasal preparation", "Vaginal tablets", "Syrups"], correct: 1, page: 2, ref: "Otic and nasal solution / Topical solution: Like inhalation and nasal preparation." },
+        { q: "Parenteral solutions include administration via:", options: ["Oral and Topical", "IV, IM, SC, and intradermal", "Eye drops", "Ear drops"], correct: 1, page: 2, ref: "Parenteral solution: Like IV, IM SC and intradermal." },
+        { q: "If a drug is poorly water-soluble for parenterals, what can be added?", options: ["Sugar", "Alcohol or glycol", "Starch", "Talc"], correct: 1, page: 2, ref: "for poorly-water drugs another solvent is added e.g. alcohol, glycol." },
+        { q: "Pyrogen is defined as a ____ substance.", options: ["Flavoring", "Fever-producing organic", "Coloring", "Stabilizing"], correct: 1, page: 2, ref: "Free from pyrogen: pyrogen is fever-producing organic substance." },
+        { q: "Pyrogens arise from:", options: ["Chemical reactions", "Microbial contamination", "High temperature", "Light exposure"], correct: 1, page: 2, ref: "pyrogen... arising from microbial contamination." },
+        { q: "Pyrogen is chemically a lipopolysaccharide and ____.", options: ["Protein", "Endotoxin", "Sugar", "Vitamin"], correct: 1, page: 2, ref: "is a lipopolysaccharide and endotoxins." },
+        { q: "Parenteral solutions must be free from particles with a diameter greater than:", options: ["1.0 μ", "7.5 μ", "15 μ", "100 μ"], correct: 1, page: 2, ref: "Clarity: free from particles specially which have a diameter 7.5 μ." },
+        { q: "Stability in solutions means the product should NOT lose its:", options: ["Color", "Therapeutic activity", "Weight", "Volume"], correct: 1, page: 2, ref: "Stability: should not loss its therapeutic activity." },
+        { q: "Aqueous solutions containing sugar are called:", options: ["Spirits", "Elixirs", "Syrups", "Aromatic water"], correct: 2, page: 2, ref: "Syrups: Aqueous solution containing sugar." },
+        { q: "Sweetened hydroalcoholic solutions are called:", options: ["Spirits", "Elixirs", "Syrups", "Aromatic water"], correct: 1, page: 2, ref: "Elixir: Sweetened hydroalcoholic solution." },
+        { q: "Solutions of aromatic materials with alcohol as a solvent are:", options: ["Syrups", "Spirits", "Aromatic water", "Elixirs"], correct: 1, page: 2, ref: "Spirits: Solution of aromatic material with alcohol solvent." },
+        { q: "Solution of aromatic material in water as a solvent is:", options: ["Spirit", "Aromatic water", "Elixir", "Syrup"], correct: 1, page: 2, ref: "Aromatic water: Solution of aromatic material in water as solvent." },
+        { q: "One advantage of solutions is that they are preferred for:", options: ["Adults only", "Children and young patients", "Comatose patients only", "Athletes"], correct: 1, page: 3, ref: "Advantages: More preferred for children and some young patients." },
+        { q: "Solutions are considered 'Quick effective' compared to solids because they are already:", options: ["Sterile", "Dissolved", "Colored", "Sweetened"], correct: 1, page: 3, ref: "Quick effective (since drugs are already in solution form)." },
+        { q: "A disadvantage of solutions compared to solid dosage forms is that they are:", options: ["More stable", "Less stable", "Easier to carry", "Less expensive"], correct: 1, page: 3, ref: "Disadvantages: Less stable than solid dosage form." },
+        { q: "In solutions, unpleasant flavors can be ____ to mask.", options: ["Easy", "Difficult", "Impossible", "Unnecessary"], correct: 1, page: 3, ref: "Unpleasant flavor can difficult to mask." },
+        { q: "Dextromethorphan (used for cough) is an example of which composition?", options: ["Elixir", "Syrup", "Spirit", "Aromatic water"], correct: 1, page: 3, ref: "Syrups: Dextromethorphan (used for treatment cough)." },
+        { q: "Dexamethasone used for rheumatoid arthritis is an example of:", options: ["Syrup", "Elixir", "Spirit", "Aromatic water"], correct: 1, page: 3, ref: "Elixir: Dexamethasone (for rheumatoid arthritis)." },
+        { q: "Peppermint spirit used as a carminative is a type of:", options: ["Syrup", "Spirit", "Elixir", "Aromatic water"], correct: 1, page: 3, ref: "Spirits: Peppermint spirit (carminative)." },
+        { q: "Camphor water used as an expectorant is an example of:", options: ["Spirit", "Aromatic water", "Syrup", "Elixir"], correct: 1, page: 3, ref: "Aromatic water: Camphor water (expectorant)." },
+        { q: "Phenyl ethyl alcohol 0.5% is suggested as a ____ in ophthalmic solutions.", options: ["Stabilizer", "Preservative", "Solvent", "Flavorant"], correct: 1, page: 2, ref: "Preservatives suggested for use in ophthalmic solutions include: A- Phenyl ethyl alcohol 0.5%." },
+        { q: "Chlorobutanol 0.5% is used as a preservative in which type of solution?", options: ["Oral", "Ophthalmic", "Topical", "Elixir"], correct: 1, page: 2, ref: "Preservatives suggested for use in ophthalmic solutions include... B- Chlorobutanol 0.5%." },
+        { q: "Benzalkonium chloride 0.01% is a preservative for ophthalmic use. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Preservatives suggested... C- Benzalkonium chloride 0.01%." },
+        { q: "Phenyl mercuric nitrate 0.001% is an ophthalmic preservative. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Preservatives suggested... D- Phenyl mercuric nitrate 0.001%." },
+        { q: "Sterility in parenterals applies to:", options: ["The product only", "The container only", "Both product and container", "The room only"], correct: 2, page: 2, ref: "Sterility: product and container must be sterilized." },
+        { q: "Autoclave and dry heat are methods for ____.", options: ["Dissolution", "Sterilization", "Sweetening", "Coloring"], correct: 1, page: 2, ref: "Sterility: product and container must be sterilized (auto clave), dry heat." },
+        { q: "What is used as a sterile solvent for parenterals?", options: ["Tap water", "Sterile water", "Alcohol 100%", "Glycerin only"], correct: 1, page: 2, ref: "Safety: solvents (sterile water)." },
+        { q: "Parenteral solutions must be 'Free from pyrogen'. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "General requirements for parenterals: 3- Free from pyrogen." },
+        { q: "Lipopolysaccharides are associated with which requirement?", options: ["Clarity", "Pyrogen-free", "Sweetness", "Viscosity"], correct: 1, page: 2, ref: "pyrogen... is a lipopolysaccharide." },
+        { q: "Stabilizers in oral solutions help maintain chemical and physical ____.", options: ["Color", "Stability", "Taste", "Volume"], correct: 1, page: 1, ref: "stabilizers to maintain the chemical and physical stability." },
+        { q: "The term 'Oral Cavity' includes preparations for the mouth and ____.", options: ["Stomach", "Throat", "Eyes", "Ear"], correct: 1, page: 2, ref: "Otic and nasal solution / Throat (from Lec 3 context, Lec 7 implies topical/nasal)." },
+        { q: "Topical solutions can include inhalation preparations. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Topical solution: Like inhalation and nasal preparation." },
+        { q: "Parenteral solutions can be administered intradermally. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Parenteral solution: Like... intradermal." },
+        { q: "Monographs may specify alcohol or glycerin as solvents. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "other liquids such as alcohol & glycerin are specified in some of monograph." },
+        { q: "Solutions contain 'soluble chemical substances'. (T/F)", options: ["True", "False"], correct: 0, page: 1, ref: "contain one or more soluble chemical substances." },
+        { q: "Sterilization of ophthalmic solutions is usually done after filling the container. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Autoclaving in the final container is the preferred method." },
+        { q: "Spirits use water as the primary solvent. (T/F)", options: ["True", "False"], correct: 1, page: 2, ref: "Spirits: ...with alcohol solvent." },
+        { q: "Aromatic water uses alcohol as the primary solvent. (T/F)", options: ["True", "False"], correct: 1, page: 2, ref: "Aromatic water: ...in water as solvent." },
+        { q: "Syrups always contain alcohol. (T/F)", options: ["True", "False"], correct: 1, page: 2, ref: "Syrups: Aqueous solution containing sugar." },
+        { q: "The 'Quick effective' nature of solutions is an advantage. (T/F)", options: ["True", "False"], correct: 0, page: 3, ref: "Advantages: 2- Quick effective." },
+        { q: "Less stability compared to solids is a disadvantage of solutions. (T/F)", options: ["True", "False"], correct: 0, page: 3, ref: "Disadvantages: 1- Less stable than solid dosage form." },
+        { q: "Pyrogen-free means the product will not produce fever. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "pyrogen is fever-producing organic substance." },
+        { q: "Clarity in parenterals means being free from particles. (T/F)", options: ["True", "False"], correct: 0, page: 2, ref: "Clarity: free from particles." },
+        { q: "Dexamethasone elixir is used for rheumatoid arthritis. (T/F)", options: ["True", "False"], correct: 0, page: 3, ref: "Elixir: Dexamethasone (for rheumatoid arthritis)." }
+    ];
+
+    let current = 0, score = 0;
+
+    function loadQ() {
+        const q = quizData[current];
+        document.getElementById('q-num').innerText = `السؤال ${current + 1} من 50`;
+        document.getElementById('q-text').innerText = q.q;
+        const container = document.getElementById('options');
+        container.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'opt';
+            div.innerText = opt;
+            div.onclick = () => check(i, div);
+            container.appendChild(div);
+        });
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('bar').style.width = ((current+1)/50*100) + '%';
+    }
+
+    function check(idx, el) {
+        const q = quizData[current];
+        const opts = document.querySelectorAll('.opt');
+        opts.forEach(o => o.style.pointerEvents = 'none');
+        if(idx === q.correct) {
+            el.classList.add('correct');
+            score++;
+        } else {
+            el.classList.add('wrong');
+            opts[q.correct].classList.add('correct');
+        }
+        document.getElementById('score').innerText = score;
+        const exp = document.getElementById('explanation');
+        exp.innerHTML = `<b>المعلومة من Lec 7:</b> ${q.ref} <br><small>المصدر: صفحة رقم (${q.page})</small>`;
+        exp.style.display = 'block';
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function nextQ() {
+        current++;
+        if(current < 50) loadQ();
+        else {
+            document.getElementById('quiz-card').innerHTML = `
+            <div style="padding:80px 40px; text-align:center;">
+                <h2 style="font-size: 2.5rem; color: var(--p);">اختبار المحاليل (Lec 7) مكتمل!</h2>
+                <h1 style="font-size: 5rem; color: var(--s);">${(score/50*100)}%</h1>
+                <p style="font-size: 1.5rem;">لقد أجبت على ${score} من 50 سؤالاً بشكل صحيح.</p>
+                <button class="btn" onclick="location.reload()" style="margin-top:30px;">إعادة الاختبار</button>
+            </div>`;
+        }
+    }
+
+    window.onload = loadQ;
+</script>
+</body>
+</html>
